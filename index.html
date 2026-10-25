@@ -87,12 +87,16 @@ const modal=h=>{$("#mbox").innerHTML=h;$("#modal").classList.add("show")},closeM
 const log=(text)=>push(ref(db,"activity"),{ts:Date.now(),gid:me,name:users[me]?.name||me,text});
 const clean=s=>s.trim().replace(/[.#$\[\]\/]/g,"-");
 
-onValue(ref(db,"users"),s=>{users=s.val()||{};draw()});
-onValue(ref(db,"sessions"),s=>{sess=s.val()||{};active=null;for(const[k,v]of Object.entries(sess))if(v.gid===me&&v.status==="on")active={k,...v};draw()});
-onValue(ref(db,"activity"),s=>{acts=s.val()||{};if(me&&users[me])drawAct()});
+let usersLoaded=false;
+const dbErr=e=>{usersLoaded=true;if(me&&!users[me]){me=null}draw();toast(/permission/i.test(e.message)?"Database blocked: set Realtime Database rules to allow read/write":"Database error: "+e.message)};
+if(me)$("#app").innerHTML=`<section class="card auth"><h2>Loading…</h2><div class="sub">Connecting to the database.</div></section>`;else drawAuth();
+setTimeout(()=>{if(!usersLoaded){usersLoaded=true;draw()}},4000);
+onValue(ref(db,"users"),s=>{users=s.val()||{};usersLoaded=true;draw()},dbErr);
+onValue(ref(db,"sessions"),s=>{sess=s.val()||{};active=null;for(const[k,v]of Object.entries(sess))if(v.gid===me&&v.status==="on")active={k,...v};draw()},dbErr);
+onValue(ref(db,"activity"),s=>{acts=s.val()||{};if(me&&users[me])drawAct()},()=>{});
 
 function draw(){
-  if(!me||!users[me]){me=me&&users[me]?me:null;return drawAuth()}
+  if(!me||!users[me]){if(me&&!usersLoaded)return;if(!$("#gid"))drawAuth();return}
   $("#hu").innerHTML=`<div class="chip"><span>${esc(users[me].name)} · ${esc(me)}</span><button class="btn ghost sm" data-a="out">Log out</button></div>`;
   if(!$("#console")){$("#app").innerHTML=`<section class="card" id="console"></section><section class="card" id="rp"></section><section class="card" id="ac"></section>`}
   if(active){sel=SHIFTS.find(x=>x.id===active.shift);d1=active.d1;d2=active.d2||""}
@@ -145,6 +149,7 @@ function drawAct(){
 
 document.addEventListener("click",async e=>{
   const t=e.target.closest("[data-a]");if(!t)return;const a=t.dataset.a;
+  try{
   if(a=="tab"){mode=t.dataset.m;drawAuth()}
   if(a=="reg"){const n=$("#nm").value.trim(),g=clean($("#gid").value);if(!n||!g)return $("#am").textContent="Enter your name and Genex ID.";
     if((await get(ref(db,"users/"+g))).exists())return $("#am").textContent="This Genex ID is already registered. Use Log in.";
@@ -179,6 +184,7 @@ document.addEventListener("click",async e=>{
       const tot=l.filter(s=>s.rawSec!=null).reduce((x,s)=>x+salary(s),0);
       return `<h3>${esc(users[g].name)} (${esc(g)}) — salary hours ${dur(tot)}</h3><table>${head}<tbody>${rows(l).replace(/<button.*?<\/button>/g,"")}</tbody></table>`}).join("")||"<p>No data in this range.</p>";
     window.print()}
+  }catch(err){const m=/permission/i.test(err.message)?"Database blocked: set Realtime Database rules to allow read/write":"Error: "+err.message;$("#am")?$("#am").textContent=m:toast(m)}
 });
 document.addEventListener("change",e=>{
   if(e.target.id=="d1"){d1=e.target.value;if(sel?.night)d2=d1?next(d1):"";drawConsole()}
