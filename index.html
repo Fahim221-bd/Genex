@@ -36,9 +36,15 @@ input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10
 .rep{margin-top:18px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .rep>h3{padding:12px 16px;background:var(--blue);font-size:21px;display:flex;justify-content:space-between;align-items:center}
 .rep h3 small{font:400 11px Poppins;color:var(--mute)}
-.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:700px}
+.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:900px}
 th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mute);font-weight:500;background:#fafdff}
 .sal{background:var(--mint);padding:3px 10px;border-radius:20px;font-weight:600}
+.brk{background:#ffe3b8;padding:3px 10px;border-radius:20px;font-weight:600}
+.tot{background:var(--blue2);padding:3px 10px;border-radius:20px;font-weight:600}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.sum div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:center}
+.sum small{display:block;color:var(--mute);font-size:11px}.sum b{font:700 22px 'Cormorant Garamond',serif}
+.sum .s{background:var(--mint)}.sum .b{background:#ffe3b8}.sum .t{background:var(--blue2)}
 .ed{border:0;background:var(--blue);border-radius:8px;width:30px;height:28px}
 .more{display:block;margin:12px auto}.run{color:var(--mint-d);font-weight:600}
 .pbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.pbar div{width:170px}
@@ -55,17 +61,23 @@ th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white
 @media print{@page{size:A4;margin:12mm}body>*:not(#pa){display:none!important}#pa{display:block;color:#000}#pa h2{font-size:22px}#pa table{min-width:0;font-size:10.5px;margin-bottom:16px}#pa h3{margin:14px 0 6px;font-size:16px}}
 </style></head>
 <body>
-<header><div class="brand"><b>G</b><div><h1>Genex Duty Tracker</h1><small>Shift hours, counted to the second</small></div></div><div id="hu"></div></header>
+<header><div class="brand"><b>G</b><div><h1>Genex Duty Tracker</h1><small>Shift hours, counted to the second · saved on this device</small></div></div><div id="hu"></div></header>
 <main id="app"></main>
 <div id="modal"><div class="box" id="mbox"></div></div><div id="toast"></div><div id="pa"></div>
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getDatabase,ref,set,push,update,onValue,get} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-const db=getDatabase(initializeApp({
-  apiKey:"AIzaSyCEnSE_jPPgTRzbrOQlROSXCN2soAToEiE",authDomain:"genex-dc660.firebaseapp.com",
-  databaseURL:"https://genex-dc660-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"genex-dc660",
-  storageBucket:"genex-dc660.firebasestorage.app",messagingSenderId:"36849681934",appId:"1:36849681934:web:bf5fcf8a779602a83f9e5f"}));
+import {getDatabase,ref,set,get,push,update,onValue} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyCEnSE_jPPgTRzbrOQlROSXCN2soAToEiE",
+  authDomain: "genex-dc660.firebaseapp.com",
+  databaseURL: "https://genex-dc660-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "genex-dc660",
+  storageBucket: "genex-dc660.firebasestorage.app",
+  messagingSenderId: "36849681934",
+  appId: "1:36849681934:web:bf5fcf8a779602a83f9e5f"
+};
+const db=getDatabase(initializeApp(firebaseConfig));
 
 const SHIFTS=[
  {id:"8-17",l:"8 AM – 5 PM",c:"#fff2b3",i:"🌅"},{id:"9-18",l:"9 AM – 6 PM",c:"#ffe3b8",i:"☀️"},
@@ -124,11 +136,15 @@ function drawConsole(){
 const tick=()=>{const c=$("#clk");if(c&&active)c.textContent=dur((Date.now()-active.loginTs)/1000)};setInterval(tick,1000);
 
 const salary=s=>s.totalSec!=null?s.totalSec:s.rawSec;
+const KPI=8*3600;
+const calc=s=>{const w=salary(s),k=Math.min(w,KPI),b=Math.max(0,w-KPI);return{k,b,t:k+b}};
+const sumBox=l=>{const c=l.filter(s=>s.rawSec!=null).map(calc),k=c.reduce((x,y)=>x+y.k,0),b=c.reduce((x,y)=>x+y.b,0);
+ return `<div class="sum"><div class="s"><small>Salary hours (KPI 8h/day)</small><b>${dur(k)}</b></div><div class="b"><small>Break hours</small><b>${dur(b)}</b></div><div class="t"><small>Total hours (Salary + Break)</small><b>${dur(k+b)}</b></div></div>`};
 function rows(list){return list.map(s=>`<tr><td>${esc(fd(s.d1))}</td><td>${esc(s.label)}</td><td>${dt(s,s.loginTs)}</td>
  <td>${s.logoutTs?dt(s,s.logoutTs):`<span class="run">Running</span>`}</td><td>${s.rawSec!=null?dur(s.rawSec):"—"}</td>
  <td>${s.totalSec!=null?dur(s.totalSec)+" ":""}${s.logoutTs?`<button class="ed" title="Edit" data-a="edit" data-k="${s.k}">✎</button>`:""}</td>
- <td>${s.rawSec!=null?`<span class="sal">${dur(salary(s))}</span>`:"—"}</td></tr>`).join("")}
-const head=`<thead><tr><th>Date</th><th>Shift</th><th>Login time</th><th>Logout time</th><th>Raw</th><th>Total hours</th><th>Salary hours</th></tr></thead>`;
+ <td>${s.rawSec!=null?`<span class="sal">${dur(calc(s).k)}</span>`:"—"}</td><td>${s.rawSec!=null?`<span class="brk">${dur(calc(s).b)}</span>`:"—"}</td><td>${s.rawSec!=null?`<span class="tot">${dur(calc(s).t)}</span>`:"—"}</td></tr>`).join("")}
+const head=`<thead><tr><th>Date</th><th>Shift</th><th>Login time</th><th>Logout time</th><th>Raw</th><th>Adjusted</th><th>Salary hours (KPI)</th><th>Break hours</th><th>Total hours</th></tr></thead>`;
 const byUser=g=>Object.entries(sess).filter(([,v])=>v.gid===g).map(([k,v])=>({k,...v})).sort((a,b)=>b.loginTs-a.loginTs);
 function drawRep(){
   const ids=[me,...Object.keys(users).filter(u=>u!==me)];
@@ -136,6 +152,7 @@ function drawRep(){
   <div class="pbar"><div><label>Print from</label><input type="date" id="pf"></div><div><label>Print to</label><input type="date" id="pt"></div><button class="btn" data-a="print">Print A4</button></div>
   ${ids.map(g=>{const all=byUser(g),days=[...new Set(all.map(s=>s.d1))].sort().reverse(),n=shown[g]||10,vis=new Set(days.slice(0,n)),list=all.filter(s=>vis.has(s.d1));
    return `<div class="rep"><h3>${esc(users[g].name)} <small>${esc(g)} · ${days.length} duty days</small></h3>
+   ${all.length?sumBox(all):""}
    ${list.length?`<div class="wrap"><table>${head}<tbody>${rows(list)}</tbody></table></div>`:`<p style="padding:16px;color:var(--mute)">No duty recorded yet.</p>`}
    ${days.length>n?`<button class="btn ghost sm more" data-a="more" data-g="${esc(g)}">Show more (${Math.min(20,days.length-n)} days)</button>`:""}</div>`}).join("")}`;
 }
@@ -181,8 +198,7 @@ document.addEventListener("click",async e=>{
   if(a=="print"){const f=$("#pf").value,to=$("#pt").value;if(!f||!to)return toast("Select the print date range");
     $("#pa").innerHTML=`<h2>Genex Duty Report</h2><p>${fd(f)} to ${fd(to)}</p>`+Object.keys(users).map(g=>{
       const l=byUser(g).filter(s=>s.d1>=f&&s.d1<=to).reverse();if(!l.length)return"";
-      const tot=l.filter(s=>s.rawSec!=null).reduce((x,s)=>x+salary(s),0);
-      return `<h3>${esc(users[g].name)} (${esc(g)}) — salary hours ${dur(tot)}</h3><table>${head}<tbody>${rows(l).replace(/<button.*?<\/button>/g,"")}</tbody></table>`}).join("")||"<p>No data in this range.</p>";
+      return `<h3>${esc(users[g].name)} (${esc(g)})</h3>${sumBox(l)}<table>${head}<tbody>${rows(l).replace(/<button.*?<\/button>/g,"")}</tbody></table>`}).join("")||"<p>No data in this range.</p>";
     window.print()}
   }catch(err){const m=/permission/i.test(err.message)?"Database blocked: set Realtime Database rules to allow read/write":"Error: "+err.message;$("#am")?$("#am").textContent=m:toast(m)}
 });
