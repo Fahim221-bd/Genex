@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Duty Shift Counter</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--c1:#D8E36B;--c2:#DDF4EA;--c3:#4FA595;--c4:#1B7F8C;--c5:#136470;--c6:#0B3B42;--ok:#2e9e6b;--bad:#d64550;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:#fff;color:var(--c6);color-scheme:light;font-family:Lato,"Segoe UI",Arial,sans-serif;min-height:100vh}
+h1,h2,h3,.serif{font-family:"Playfair Display",Georgia,serif;margin:0}
+.wrap{max-width:980px;margin:0 auto;padding:18px 14px 60px}
+header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--c3);padding-bottom:12px;margin-bottom:18px;gap:10px;flex-wrap:wrap}
+header h1{font-size:26px;color:var(--c5);letter-spacing:.5px}
+header small{color:var(--c3)}
+.card{background:var(--c2);color:var(--c6);border-radius:14px;padding:18px;margin-bottom:18px;box-shadow:0 6px 20px rgba(65,59,97,.18);border:1px solid #bfe6d8;border-top:4px solid var(--c1)}
+.card h2{color:var(--c4);font-size:20px;margin-bottom:12px}
+input,button{font:inherit}
+input{width:100%;padding:10px 12px;border:1.5px solid var(--c3);border-radius:8px;background:#fff;color:var(--c6);margin:4px 0 10px}
+label{font-size:13px;font-weight:700;color:var(--c4)}
+.btn{background:var(--c4);color:#fff;border:0;border-radius:8px;padding:10px 18px;cursor:pointer;font-weight:700}
+.btn:hover{background:var(--c5)}.btn.o{background:var(--c1);color:var(--c6)}.btn.g{background:transparent;border:1.5px solid var(--c4);color:var(--c4)}
+.tabs{display:flex;gap:8px;margin-bottom:12px}.tabs .btn{flex:1;background:transparent;color:var(--c4);border:1.5px solid var(--c4)}.tabs .btn.on{background:var(--c4);color:#fff}
+.shifts{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:8px 0 14px}
+.sh{border:3px solid transparent;border-radius:16px;padding:14px 6px;text-align:center;cursor:pointer;font-weight:700;font-size:14px;transition:.15s}
+.sh span{display:block;font-size:11px;font-weight:400;opacity:.85;margin-top:3px}
+.sh.sel{border-color:var(--c6);transform:scale(1.06);box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.sh.dis{opacity:.5;cursor:not-allowed}
+.s0{background:#F1F6B5;color:#0B3B42}.s1{background:#D8E36B;color:#0B3B42}.s2{background:#BFEBD9;color:#0B3B42}.s3{background:#7FC8B5;color:#0B3B42}.s4{background:#1B7F8C;color:#fff}.s5{background:#0B3B42;color:#DDF4EA}
+.tg{display:flex;gap:30px;flex-wrap:wrap;margin:6px 0}
+.tg div{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--c4)}
+.sw{width:62px;height:32px;border-radius:20px;background:#fff;position:relative;cursor:pointer;border:2px solid #b8c4c6;transition:.2s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:#b8c4c6;transition:.2s}
+.sw.on{background:var(--ok);border-color:var(--ok)}.sw.red{background:var(--bad);border-color:var(--bad)}.sw.on::after,.sw.red::after{left:32px;background:#fff}
+.warn{background:#ffe3e3;color:#9b1c25;border-left:4px solid var(--bad);padding:8px 12px;border-radius:6px;margin:8px 0;font-weight:700}
+.clock{font-family:"Playfair Display",Georgia,serif;font-size:44px;color:var(--c5);text-align:center;margin:10px 0 0}
+.sub{text-align:center;color:var(--c4);font-size:13px}
+.urow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:6px 0}
+.box{background:#fff;border:1px solid var(--c3);border-radius:10px;padding:8px 10px;font-size:13px;position:relative}
+.box b{display:block;color:var(--c3);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+.box em{font-style:normal;font-size:15px;color:var(--c6);font-weight:700}
+.pen{position:absolute;right:8px;top:8px;cursor:pointer;background:none;border:0;font-size:16px}
+.rec{border:1px solid var(--c3);border-radius:12px;padding:10px;margin:10px 0;background:#f3fbf8}
+.rec .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.tag{padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700}
+.ubox{border:2px solid var(--c4);border-radius:14px;padding:12px;margin-bottom:16px;background:#fff}
+.ubox>h3{color:var(--c5);border-bottom:2px solid var(--c1);padding-bottom:6px;margin-bottom:6px}
+.bar{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.bar>div{flex:1;min-width:140px}
+.log{font-size:13px;border-left:3px solid var(--c1);padding:5px 10px;margin:6px 0;background:#fff;border-radius:0 8px 8px 0}.log i{color:var(--c3);font-style:normal;font-size:11px;display:block}
+.modal{position:fixed;inset:0;background:rgba(3,18,47,.75);display:flex;align-items:center;justify-content:center;z-index:50;padding:14px}
+.modal .card{max-width:420px;width:100%;margin:0}
+.row{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+#pr{display:none}
+@media print{@page{size:A4;margin:12mm}body{background:#fff!important;color:#000}.wrap,.modal{display:none!important}#pr{display:block;color:#000;font-family:Georgia,serif}#pr table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}#pr th,#pr td{border:1px solid #444;padding:4px;text-align:left}#pr th{background:#eee}}
+</style></head><body>
+<div class="wrap" id="app"></div><div id="pr"></div><div id="md"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const SH=["8 AM - 5 PM","9 AM - 6 PM","10 AM - 7 PM","11 AM - 8 PM","2 PM - 11 PM","11 PM - 8 AM"];
+const ICON=["☀️","🌤️","🌞","🌇","🌆","🌙"];
+firebase.initializeApp({apiKey:"AIzaSyCEnSE_jPPgTRzbrOQlROSXCN2soAToEiE",authDomain:"genex-dc660.firebaseapp.com",projectId:"genex-dc660",storageBucket:"genex-dc660.firebasestorage.app",messagingSenderId:"36849681934",appId:"1:36849681934:web:bf5fcf8a779602a83f9e5f"});
+const db=firebase.firestore();db.settings({experimentalForceLongPolling:true,merge:true});
+const nid=x=>x.trim().toUpperCase().replace(/[\/\s]/g,"");
+const fsRec=x=>db.collection("recs").doc(x.id).set(x);
+let offOn=false;let S={users:[],recs:[],act:[],active:{}},cur=null,sel=newSel(),lim={},actLim=10,warn="",tab="login",msg="",tick=null;
+try{cur=localStorage.getItem("dsc_cur")}catch(e){}
+const save=()=>{};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function p2(n){return String(n).padStart(2,"0")}
+function ymd(d){return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())}const _y=d=>d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
+const dt=t=>{if(!t)return"—";const d=new Date(t),h=d.getHours();return d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})+", "+p2(h%12||12)+":"+p2(d.getMinutes())+":"+p2(d.getSeconds())+" "+(h<12?"AM":"PM")};
+const hms=s=>p2(Math.floor(s/3600))+"h "+p2(Math.floor(s%3600/60))+"m "+p2(s%60)+"s";
+const loc=t=>{const d=new Date(t);return ymd(d)+"T"+p2(d.getHours())+":"+p2(d.getMinutes())};
+const now=()=>Date.now();
+const log=t=>{db.collection("act").add({t:now(),x:t}).catch(()=>{})};
+const user=()=>S.users.find(u=>u.id===cur);
+const DUTY=8*3600,BRK=3600;
+function nd(x){const d=new Date(x+"T00:00");d.setDate(d.getDate()+1);return ymd(d)}
+function newSel(){const d=ymd(new Date());return{date:d,shift:null,end:nd(d)}}
+const salary=r=>{const base=r.total!=null?r.total:r.raw,k=r.total!=null?"Total Hours":"Raw",brk=Math.min(Math.max(base-DUTY,0),BRK);return{v:base-brk,b:brk,k}};
+async function reg(){const n=v("rn").trim(),id=nid(v("ri"));
+ if(!n||!id)return setMsg("Name & Genex ID are required.");
+ try{const d=await db.collection("users").doc(id).get();
+ if(d.exists)return setMsg("This Genex ID is already registered. Please login.");
+ await db.collection("users").doc(id).set({name:n,id});S.users.push({name:n,id});cur=id;try{localStorage.setItem("dsc_cur",id)}catch(e){}log(n+" ("+id+") registered");msg="";render()}catch(e){setMsg("Database error: "+e.message)}}
+async function login(){const id=nid(v("li"));
+ try{const d=await db.collection("users").doc(id).get();
+ if(!d.exists)return setMsg("Genex ID not found. Please register first.");
+ if(!S.users.some(u=>u.id===id))S.users.push(d.data());cur=id;try{localStorage.setItem("dsc_cur",id)}catch(e){}msg="";log(user().name+" logged in");render()}catch(e){setMsg("Database error: "+e.message)}}
+function logout(){cur=null;try{localStorage.removeItem("dsc_cur")}catch(e){}render()}
+const v=i=>document.getElementById(i).value;
+function setMsg(m){msg=m;render()}
+function pickShift(i){if(S.active[cur])return;sel.shift=i;warn="";render()}
+function setDate(x){sel.date=x;sel.end=nd(x);warn="";render()}
+function setEnd(x){sel.end=x;warn="";render()}
+function togOn(){const a=S.active[cur];if(a)return;
+ if(!sel.date||sel.shift===null){warn="Select the Date & Shift first";return render()}
+ if(sel.shift===5&&(!sel.end||sel.end<=sel.date)){warn="Logout Date must be after Login Date";return render()}
+ const en=sel.shift===5?sel.end:"";
+ S.active[cur]={shift:sel.shift,date:sel.date,end:en,start:now()};db.collection("active").doc(cur).set(S.active[cur]);log(user().name+" went ON shift ("+SH[sel.shift]+", "+sel.date+(en?" → "+en:"")+")");render()}
+function togOff(){const a=S.active[cur];
+ if(!a){warn="Select the Date & Shift first";return render()}
+ offOn=true;render();modal('<h2>Day Close</h2><p>Do you want to close <b>'+a.date+(a.end?' → '+a.end:'')+'</b> ('+SH[a.shift]+') and save the data?</p><div class="row"><button class="btn g" onclick="closeM()">No</button><button class="btn o" onclick="yes()">Yes, Close</button></div>')}
+function yes(){const a=S.active[cur],e=now();
+ const R={id:"r"+e,uid:cur,date:a.date,end:a.end||"",shift:a.shift,login:a.start,logout:e,raw:Math.round((e-a.start)/1000),total:null,sub:false};S.recs.push(R);fsRec(R);
+ delete S.active[cur];db.collection("active").doc(cur).delete();log(user().name+" closed day "+a.date+" ("+SH[a.shift]+")");save();sel=newSel();closeM()}
+function askReset(){modal('<h2>Reset All Data</h2><p>This will permanently delete <b>all users, reports and activity</b> for everyone. This cannot be undone.</p><label>Enter password to confirm</label><input id="rs" type="password" placeholder="Password" autocomplete="off"><div class="row"><button class="btn g" onclick="closeM()">Cancel</button><button class="btn" style="background:var(--bad)" onclick="doReset()">Delete Everything</button></div>')}
+async function sha(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("")}
+async function doReset(){if(await sha(v("rs"))!=="8d98c62e4d63f544e397201fe75b39dc5ca11c0151b6daba6b39d0bb4cc3f803"){alert("Wrong password.");return}
+ try{for(const c of ["users","recs","active","act"]){const q=await db.collection(c).get();let i=0;while(i<q.docs.length){const b=db.batch();q.docs.slice(i,i+400).forEach(d=>b.delete(d.ref));await b.commit();i+=400}}
+ S={users:[],recs:[],act:[],active:{}};cur=null;try{localStorage.removeItem("dsc_cur")}catch(e){}sel=newSel();lim={};actLim=10;closeM();alert("All data has been reset.")}catch(e){alert("Reset failed: "+e.message)}}
+function modal(h){document.getElementById("md").innerHTML='<div class="modal"><div class="card">'+h+'</div></div>'}
+function closeM(){document.getElementById("md").innerHTML="";offOn=false;render()}
+function edit(id){const r=S.recs.find(x=>x.id===id);
+ modal('<h2>Edit Login / Logout</h2>'+(r.shift===5?'<div class="sub" style="text-align:left;margin-bottom:6px">Night shift: time before 12 AM belongs to the shift date; 12 AM onward must use the next date.</div>':'')+'<label>Login time</label><input type="datetime-local" id="el" value="'+loc(r.login)+'"><label>Logout time</label><input type="datetime-local" id="eo" value="'+loc(r.logout)+'"><div class="row"><button class="btn g" onclick="closeM()">Cancel</button><button class="btn o" onclick="done(\''+id+'\')">Edit Done</button></div>')}
+function done(id){const r=S.recs.find(x=>x.id===id),a=new Date(v("el")).getTime(),b=new Date(v("eo")).getTime();
+ if(isNaN(a)||isNaN(b)||b<=a){alert("Logout must be after login.");return}
+ r.login=a;r.logout=b;r.total=Math.round((b-a)/1000);r.sub=false;fsRec(r);log(user().name+" edited "+r.date+" ("+SH[r.shift]+") → Total "+hms(r.total));save();closeM();render()}
+function subRaw(id){const r=S.recs.find(x=>x.id===id);r.total=null;r.sub=true;fsRec(r);log(user().name+" submitted Raw for "+r.date+" ("+SH[r.shift]+")");save();render()}
+function more(u){lim[u]=(lim[u]||10)+(lim[u]?20:20);render()}
+function print_(){const f=v("pf"),t=v("pt");if(!f||!t)return alert("Select the date range first.");
+ let h='<h2>Duty Shift Report</h2><p>'+f+' to '+t+'</p>';
+ S.users.forEach(u=>{const rs=S.recs.filter(r=>r.uid===u.id&&r.date>=f&&r.date<=t).sort((a,b)=>a.date<b.date?-1:1);if(!rs.length)return;
+  h+='<h3>'+esc(u.name)+' ('+esc(u.id)+')</h3><table><tr><th>Date</th><th>Shift</th><th>Login</th><th>Logout</th><th>Raw</th><th>Total Hours</th><th>Break</th><th>Salary Hours</th></tr>'+
+  rs.map(r=>'<tr><td>'+r.date+(r.end?' → '+r.end:'')+'</td><td>'+SH[r.shift]+'</td><td>'+dt(r.login)+'</td><td>'+dt(r.logout)+'</td><td>'+hms(r.raw)+'</td><td>'+(r.total!=null?hms(r.total):"—")+'</td><td>'+hms(salary(r).b)+'</td><td>'+hms(salary(r).v)+'</td></tr>').join("")+'</table>'});
+ document.getElementById("pr").innerHTML=h;window.print()}
+function recHtml(r){const s=salary(r),c="s"+r.shift;
+ return '<div class="rec"><div class="top"><span><b>'+r.date+(r.end?' → '+r.end:'')+'</b> <span class="tag '+c+'">'+ICON[r.shift]+' '+SH[r.shift]+'</span></span><span><button class="btn g" style="padding:5px 10px" onclick="subRaw(\''+r.id+'\')">Submit Raw</button></span></div>'+
+ '<div class="urow"><div class="box"><b>Login time</b><em>'+dt(r.login)+'</em></div><div class="box"><b>Logout time</b><em>'+dt(r.logout)+'</em></div><div class="box"><b>Raw</b><em>'+hms(r.raw)+'</em></div>'+
+ '<div class="box"><b>Total Hours</b><em>'+(r.total!=null?hms(r.total):"&nbsp;")+'</em><button class="pen" title="Edit" onclick="edit(\''+r.id+'\')">✏️</button></div>'+
+ '<div class="box"><b>Break (max 1h)</b><em>'+hms(s.b)+'</em></div><div class="box" style="border-color:var(--ok)"><b>Salary Hours</b><em>'+hms(s.v)+'</em><span style="font-size:11px;color:var(--c3)">from '+s.k+' − break</span></div></div></div>'}
+function render(){const app=document.getElementById("app");clearInterval(tick);
+ if(!user()){app.innerHTML='<header><div><h1>Duty Shift Counter</h1><small>Track your shifts with precision</small></div></header><div class="card" style="max-width:420px;margin:30px auto"><div class="tabs"><button class="btn '+(tab=="login"?"on":"")+'" onclick="tab=\'login\';msg=\'\';render()">Login</button><button class="btn '+(tab=="reg"?"on":"")+'" onclick="tab=\'reg\';msg=\'\';render()">Register</button></div>'+
+  (tab=="login"?'<label>Genex ID</label><input id="li" placeholder="Enter Genex ID"><button class="btn o" style="width:100%" onclick="login()">Login</button>':'<label>Name</label><input id="rn" placeholder="Full name"><label>Genex ID</label><input id="ri" placeholder="Genex ID"><button class="btn o" style="width:100%" onclick="reg()">Submit</button>')+(msg?'<div class="warn">'+msg+'</div>':'')+'</div>';return}
+ const a=S.active[cur],locked=!!a,d=a?a.date:sel.date,ed=a?a.end:sel.end,si=a?a.shift:sel.shift;
+ let h='<header><div><h1>Duty Shift Counter</h1><small>'+esc(user().name)+' · '+esc(cur)+'</small></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn g" style="color:var(--bad);border-color:var(--bad)" onclick="askReset()">Reset All Data</button><button class="btn g" style="color:var(--c4);border-color:var(--c4)" onclick="logout()">Logout</button></div></header>';
+ h+='<div class="card"><h2>Shift Control</h2><label>'+(si===5?"Login Date (11 PM – 12 AM)":"Date")+'</label><input type="date" value="'+d+'" '+(locked?"disabled":"")+' onchange="setDate(this.value)">'+(si===5?'<label>Logout Date (12 AM – 8 AM)</label><input type="date" value="'+ed+'" '+(locked?"disabled":"")+' onchange="setEnd(this.value)">':"")+'<label>Select Shift</label><div class="shifts">'+SH.map((s,i)=>'<div class="sh s'+i+(si===i?" sel":"")+(locked&&si!==i?" dis":"")+'" onclick="pickShift('+i+')">'+ICON[i]+'<br>'+s+'<span>'+(i>=4?"Night":"Day")+'</span></div>').join("")+'</div>'+
+ (warn?'<div class="warn">'+warn+'</div>':'')+'<div class="tg"><div>On Shift <button class="sw '+(a?"on":"")+'" onclick="togOn()" aria-label="On shift"></button></div><div>Off Shift <button class="sw '+(offOn?"red":"")+'" onclick="togOff()" aria-label="Off shift"></button></div></div>'+
+ (a?'<div class="clock" id="ck">00h 00m 00s</div><div class="sub">Counting since '+dt(a.start)+(a.shift===5?' · night shift: '+a.date+' → '+a.end:'')+'</div>':'<div class="sub" style="margin-top:8px">Toggle On Shift to start counting.</div>')+'</div>';
+ h+='<div class="card"><h2>User Report</h2><div class="box" style="border:2px solid var(--ok);margin-bottom:12px"><b>Total Salary Hours</b><em style="font-size:22px">'+hms(S.recs.reduce((t,x)=>t+salary(x).v,0))+'</em></div><div class="bar"><div><label>From</label><input type="date" id="pf"></div><div><label>To</label><input type="date" id="pt"></div><div><button class="btn o" style="margin-bottom:10px" onclick="print_()">🖨 Print (A4)</button></div></div>';
+ const us=[...S.users].sort((x,y)=>(y.id===cur)-(x.id===cur));
+ us.forEach(u=>{const rs=S.recs.filter(r=>r.uid===u.id).sort((x,y)=>y.login-x.login),n=lim[u.id]||10;
+  h+='<div class="ubox"><h3>'+esc(u.name)+' <small style="font-size:13px;color:var(--c3)">'+esc(u.id)+' · Salary '+hms(S.recs.filter(x=>x.uid===u.id).reduce((t,x)=>t+salary(x).v,0))+'</small></h3>'+(rs.length?rs.slice(0,n).map(recHtml).join(""):'<div class="sub">No data yet.</div>')+(rs.length>n?'<button class="btn g" onclick="more(\''+u.id+'\')">Show more (+20)</button>':'')+'</div>'});
+ h+='</div><div class="card"><h2>Activity Flow</h2>'+(S.act.length?S.act.slice(0,actLim).map(l=>'<div class="log"><i>'+dt(l.t)+'</i>'+esc(l.x)+'</div>').join(""):'<div class="sub">No activity yet.</div>')+(S.act.length>actLim?'<button class="btn g" onclick="actLim=1e9;render()">Load older data</button>':'')+'</div>';
+ app.innerHTML=h;
+ if(a){const u=()=>{const e=document.getElementById("ck");if(e)e.textContent=hms(Math.floor((now()-S.active[cur].start)/1000))};u();tick=setInterval(u,1000)}}
+let pend=false;
+const kick=()=>{if(!cur)return;const a=document.activeElement;if(a&&a.tagName==="INPUT"){pend=true;return}render()};
+document.addEventListener("focusout",()=>{if(pend){pend=false;setTimeout(render,80)}});
+let shown=false;const er=e=>{console.error(e);if(!shown){shown=true;alert("Database error: "+e.message+"\nCheck Firestore is created and Rules are published.")}};
+db.collection("users").onSnapshot(q=>{S.users=q.docs.map(d=>d.data());kick()},er);
+db.collection("recs").onSnapshot(q=>{S.recs=q.docs.map(d=>d.data());kick()},er);
+db.collection("active").onSnapshot(q=>{S.active={};q.docs.forEach(d=>S.active[d.id]=d.data());kick()},er);
+db.collection("act").orderBy("t","desc").limit(300).onSnapshot(q=>{S.act=q.docs.map(d=>d.data());kick()},er);
+render();
+</script></body></html>
