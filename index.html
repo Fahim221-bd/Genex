@@ -1,158 +1,187 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Duty Shift Counter</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Genex Duty Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--c1:#D8E36B;--c2:#DDF4EA;--c3:#4FA595;--c4:#1B7F8C;--c5:#136470;--c6:#0B3B42;--ok:#2e9e6b;--bad:#d64550;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--ink:#1d3748;--mute:#6b8394;--blue:#eaf4fb;--blue2:#cfe5f4;--line:#d9e6ef;--mint:#cfeedd;--mint-d:#4fa77e;--red:#d9696b}
 *{box-sizing:border-box}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:#fff;color:var(--c6);color-scheme:light;font-family:Lato,"Segoe UI",Arial,sans-serif;min-height:100vh}
-h1,h2,h3,.serif{font-family:"Playfair Display",Georgia,serif;margin:0}
-.wrap{max-width:980px;margin:0 auto;padding:18px 14px 60px}
-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--c3);padding-bottom:12px;margin-bottom:18px;gap:10px;flex-wrap:wrap}
-header h1{font-size:26px;color:var(--c5);letter-spacing:.5px}
-header small{color:var(--c3)}
-.card{background:var(--c2);color:var(--c6);border-radius:14px;padding:18px;margin-bottom:18px;box-shadow:0 6px 20px rgba(65,59,97,.18);border:1px solid #bfe6d8;border-top:4px solid var(--c1)}
-.card h2{color:var(--c4);font-size:20px;margin-bottom:12px}
-input,button{font:inherit}
-input{width:100%;padding:10px 12px;border:1.5px solid var(--c3);border-radius:8px;background:#fff;color:var(--c6);margin:4px 0 10px}
-label{font-size:13px;font-weight:700;color:var(--c4)}
-.btn{background:var(--c4);color:#fff;border:0;border-radius:8px;padding:10px 18px;cursor:pointer;font-weight:700}
-.btn:hover{background:var(--c5)}.btn.o{background:var(--c1);color:var(--c6)}.btn.g{background:transparent;border:1.5px solid var(--c4);color:var(--c4)}
-.tabs{display:flex;gap:8px;margin-bottom:12px}.tabs .btn{flex:1;background:transparent;color:var(--c4);border:1.5px solid var(--c4)}.tabs .btn.on{background:var(--c4);color:#fff}
-.shifts{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:8px 0 14px}
-.sh{border:3px solid transparent;border-radius:16px;padding:14px 6px;text-align:center;cursor:pointer;font-weight:700;font-size:14px;transition:.15s}
-.sh span{display:block;font-size:11px;font-weight:400;opacity:.85;margin-top:3px}
-.sh.sel{border-color:var(--c6);transform:scale(1.06);box-shadow:0 4px 12px rgba(0,0,0,.4)}
-.sh.dis{opacity:.5;cursor:not-allowed}
-.s0{background:#F1F6B5;color:#0B3B42}.s1{background:#D8E36B;color:#0B3B42}.s2{background:#BFEBD9;color:#0B3B42}.s3{background:#7FC8B5;color:#0B3B42}.s4{background:#1B7F8C;color:#fff}.s5{background:#0B3B42;color:#DDF4EA}
-.tg{display:flex;gap:30px;flex-wrap:wrap;margin:6px 0}
-.tg div{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--c4)}
-.sw{width:62px;height:32px;border-radius:20px;background:#fff;position:relative;cursor:pointer;border:2px solid #b8c4c6;transition:.2s}
-.sw::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:#b8c4c6;transition:.2s}
-.sw.on{background:var(--ok);border-color:var(--ok)}.sw.red{background:var(--bad);border-color:var(--bad)}.sw.on::after,.sw.red::after{left:32px;background:#fff}
-.warn{background:#ffe3e3;color:#9b1c25;border-left:4px solid var(--bad);padding:8px 12px;border-radius:6px;margin:8px 0;font-weight:700}
-.clock{font-family:"Playfair Display",Georgia,serif;font-size:44px;color:var(--c5);text-align:center;margin:10px 0 0}
-.sub{text-align:center;color:var(--c4);font-size:13px}
-.urow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:6px 0}
-.box{background:#fff;border:1px solid var(--c3);border-radius:10px;padding:8px 10px;font-size:13px;position:relative}
-.box b{display:block;color:var(--c3);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
-.box em{font-style:normal;font-size:15px;color:var(--c6);font-weight:700}
-.pen{position:absolute;right:8px;top:8px;cursor:pointer;background:none;border:0;font-size:16px}
-.rec{border:1px solid var(--c3);border-radius:12px;padding:10px;margin:10px 0;background:#f3fbf8}
-.rec .top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:4px}
-.tag{padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700}
-.ubox{border:2px solid var(--c4);border-radius:14px;padding:12px;margin-bottom:16px;background:#fff}
-.ubox>h3{color:var(--c5);border-bottom:2px solid var(--c1);padding-bottom:6px;margin-bottom:6px}
-.bar{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.bar>div{flex:1;min-width:140px}
-.log{font-size:13px;border-left:3px solid var(--c1);padding:5px 10px;margin:6px 0;background:#fff;border-radius:0 8px 8px 0}.log i{color:var(--c3);font-style:normal;font-size:11px;display:block}
-.modal{position:fixed;inset:0;background:rgba(3,18,47,.75);display:flex;align-items:center;justify-content:center;z-index:50;padding:14px}
-.modal .card{max-width:420px;width:100%;margin:0}
-.row{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
-#pr{display:none}
-@media print{@page{size:A4;margin:12mm}body{background:#fff!important;color:#000}.wrap,.modal{display:none!important}#pr{display:block;color:#000;font-family:Georgia,serif}#pr table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}#pr th,#pr td{border:1px solid #444;padding:4px;text-align:left}#pr th{background:#eee}}
-</style></head><body>
-<div class="wrap" id="app"></div><div id="pr"></div><div id="md"></div>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script>
-const SH=["8 AM - 5 PM","9 AM - 6 PM","10 AM - 7 PM","11 AM - 8 PM","2 PM - 11 PM","11 PM - 8 AM"];
-const ICON=["☀️","🌤️","🌞","🌇","🌆","🌙"];
-firebase.initializeApp({apiKey:"AIzaSyCEnSE_jPPgTRzbrOQlROSXCN2soAToEiE",authDomain:"genex-dc660.firebaseapp.com",databaseURL:"https://genex-dc660-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"genex-dc660",storageBucket:"genex-dc660.firebasestorage.app",messagingSenderId:"36849681934",appId:"1:36849681934:web:bf5fcf8a779602a83f9e5f"});
-const db=firebase.database();
-const nid=x=>x.trim().toUpperCase().replace(/[\/\s.#$\[\]]/g,"");
-const fsRec=x=>db.ref("recs/"+x.id).set(x);
-let offOn=false;let S={users:[],recs:[],act:[],active:{}},cur=null,sel=newSel(),lim={},actLim=10,warn="",tab="login",msg="",tick=null;
-try{cur=localStorage.getItem("dsc_cur")}catch(e){}
-const save=()=>{};
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function p2(n){return String(n).padStart(2,"0")}
-function ymd(d){return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())}const _y=d=>d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
-const dt=t=>{if(!t)return"—";const d=new Date(t),h=d.getHours();return d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})+", "+p2(h%12||12)+":"+p2(d.getMinutes())+":"+p2(d.getSeconds())+" "+(h<12?"AM":"PM")};
-const hms=s=>p2(Math.floor(s/3600))+"h "+p2(Math.floor(s%3600/60))+"m "+p2(s%60)+"s";
-const loc=t=>{const d=new Date(t);return ymd(d)+"T"+p2(d.getHours())+":"+p2(d.getMinutes())};
-const now=()=>Date.now();
-const log=t=>{db.ref("act").push({t:now(),x:t}).catch(()=>{})};
-const user=()=>S.users.find(u=>u.id===cur);
-const DUTY=8*3600,BRK=3600;
-function nd(x){const d=new Date(x+"T00:00");d.setDate(d.getDate()+1);return ymd(d)}
-function newSel(){const d=ymd(new Date());return{date:d,shift:null,end:nd(d)}}
-const salary=r=>{const base=r.total!=null?r.total:r.raw,k=r.total!=null?"Total Hours":"Raw",brk=Math.min(Math.max(base-DUTY,0),BRK);return{v:base-brk,b:brk,k}};
-async function reg(){const n=v("rn").trim(),id=nid(v("ri"));
- if(!n||!id)return setMsg("Name & Genex ID are required.");
- try{const d=await db.ref("users/"+id).get();
- if(d.exists())return setMsg("This Genex ID is already registered. Please login.");
- await db.ref("users/"+id).set({name:n,id});S.users.push({name:n,id});cur=id;try{localStorage.setItem("dsc_cur",id)}catch(e){}log(n+" ("+id+") registered");msg="";render()}catch(e){setMsg("Database error: "+e.message)}}
-async function login(){const id=nid(v("li"));
- try{const d=await db.ref("users/"+id).get();
- if(!d.exists())return setMsg("Genex ID not found. Please register first.");
- if(!S.users.some(u=>u.id===id))S.users.push(d.val());cur=id;try{localStorage.setItem("dsc_cur",id)}catch(e){}msg="";log(user().name+" logged in");render()}catch(e){setMsg("Database error: "+e.message)}}
-function logout(){cur=null;try{localStorage.removeItem("dsc_cur")}catch(e){}render()}
-const v=i=>document.getElementById(i).value;
-function setMsg(m){msg=m;render()}
-function pickShift(i){if(S.active[cur])return;sel.shift=i;warn="";render()}
-function setDate(x){sel.date=x;sel.end=nd(x);warn="";render()}
-function setEnd(x){sel.end=x;warn="";render()}
-function togOn(){const a=S.active[cur];if(a)return;
- if(!sel.date||sel.shift===null){warn="Select the Date & Shift first";return render()}
- if(sel.shift===5&&(!sel.end||sel.end<=sel.date)){warn="Logout Date must be after Login Date";return render()}
- const en=sel.shift===5?sel.end:"";
- S.active[cur]={shift:sel.shift,date:sel.date,end:en,start:now()};db.ref("active/"+cur).set(S.active[cur]);log(user().name+" went ON shift ("+SH[sel.shift]+", "+sel.date+(en?" → "+en:"")+")");render()}
-function togOff(){const a=S.active[cur];
- if(!a){warn="Select the Date & Shift first";return render()}
- offOn=true;render();modal('<h2>Day Close</h2><p>Do you want to close <b>'+a.date+(a.end?' → '+a.end:'')+'</b> ('+SH[a.shift]+') and save the data?</p><div class="row"><button class="btn g" onclick="closeM()">No</button><button class="btn o" onclick="yes()">Yes, Close</button></div>')}
-function yes(){const a=S.active[cur],e=now();
- const R={id:"r"+e,uid:cur,date:a.date,end:a.end||"",shift:a.shift,login:a.start,logout:e,raw:Math.round((e-a.start)/1000),total:null,sub:false};S.recs.push(R);fsRec(R);
- delete S.active[cur];db.ref("active/"+cur).remove();log(user().name+" closed day "+a.date+" ("+SH[a.shift]+")");save();sel=newSel();closeM()}
-function askReset(){modal('<h2>Reset All Data</h2><p>This will permanently delete <b>all users, reports and activity</b> for everyone. This cannot be undone.</p><label>Enter password to confirm</label><input id="rs" type="password" placeholder="Password" autocomplete="off"><div class="row"><button class="btn g" onclick="closeM()">Cancel</button><button class="btn" style="background:var(--bad)" onclick="doReset()">Delete Everything</button></div>')}
-async function sha(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("")}
-async function doReset(){if(await sha(v("rs"))!=="8d98c62e4d63f544e397201fe75b39dc5ca11c0151b6daba6b39d0bb4cc3f803"){alert("Wrong password.");return}
- try{for(const c of ["users","recs","active","act"])await db.ref(c).remove();
- S={users:[],recs:[],act:[],active:{}};cur=null;try{localStorage.removeItem("dsc_cur")}catch(e){}sel=newSel();lim={};actLim=10;closeM();alert("All data has been reset.")}catch(e){alert("Reset failed: "+e.message)}}
-function modal(h){document.getElementById("md").innerHTML='<div class="modal"><div class="card">'+h+'</div></div>'}
-function closeM(){document.getElementById("md").innerHTML="";offOn=false;render()}
-function edit(id){const r=S.recs.find(x=>x.id===id);
- modal('<h2>Edit Login / Logout</h2>'+(r.shift===5?'<div class="sub" style="text-align:left;margin-bottom:6px">Night shift: time before 12 AM belongs to the shift date; 12 AM onward must use the next date.</div>':'')+'<label>Login time</label><input type="datetime-local" id="el" value="'+loc(r.login)+'"><label>Logout time</label><input type="datetime-local" id="eo" value="'+loc(r.logout)+'"><div class="row"><button class="btn g" onclick="closeM()">Cancel</button><button class="btn o" onclick="done(\''+id+'\')">Edit Done</button></div>')}
-function done(id){const r=S.recs.find(x=>x.id===id),a=new Date(v("el")).getTime(),b=new Date(v("eo")).getTime();
- if(isNaN(a)||isNaN(b)||b<=a){alert("Logout must be after login.");return}
- r.login=a;r.logout=b;r.total=Math.round((b-a)/1000);r.sub=false;fsRec(r);log(user().name+" edited "+r.date+" ("+SH[r.shift]+") → Total "+hms(r.total));save();closeM();render()}
-function subRaw(id){const r=S.recs.find(x=>x.id===id);r.total=null;r.sub=true;fsRec(r);log(user().name+" submitted Raw for "+r.date+" ("+SH[r.shift]+")");save();render()}
-function more(u){lim[u]=(lim[u]||10)+(lim[u]?20:20);render()}
-function print_(){const f=v("pf"),t=v("pt");if(!f||!t)return alert("Select the date range first.");
- let h='<h2>Duty Shift Report</h2><p>'+f+' to '+t+'</p>';
- S.users.forEach(u=>{const rs=S.recs.filter(r=>r.uid===u.id&&r.date>=f&&r.date<=t).sort((a,b)=>a.date<b.date?-1:1);if(!rs.length)return;
-  h+='<h3>'+esc(u.name)+' ('+esc(u.id)+')</h3><table><tr><th>Date</th><th>Shift</th><th>Login</th><th>Logout</th><th>Raw</th><th>Total Hours</th><th>Break</th><th>Salary Hours</th></tr>'+
-  rs.map(r=>'<tr><td>'+r.date+(r.end?' → '+r.end:'')+'</td><td>'+SH[r.shift]+'</td><td>'+dt(r.login)+'</td><td>'+dt(r.logout)+'</td><td>'+hms(r.raw)+'</td><td>'+(r.total!=null?hms(r.total):"—")+'</td><td>'+hms(salary(r).b)+'</td><td>'+hms(salary(r).v)+'</td></tr>').join("")+'</table>'});
- document.getElementById("pr").innerHTML=h;window.print()}
-function recHtml(r){const s=salary(r),c="s"+r.shift;
- return '<div class="rec"><div class="top"><span><b>'+r.date+(r.end?' → '+r.end:'')+'</b> <span class="tag '+c+'">'+ICON[r.shift]+' '+SH[r.shift]+'</span></span><span><button class="btn g" style="padding:5px 10px" onclick="subRaw(\''+r.id+'\')">Submit Raw</button></span></div>'+
- '<div class="urow"><div class="box"><b>Login time</b><em>'+dt(r.login)+'</em></div><div class="box"><b>Logout time</b><em>'+dt(r.logout)+'</em></div><div class="box"><b>Raw</b><em>'+hms(r.raw)+'</em></div>'+
- '<div class="box"><b>Total Hours</b><em>'+(r.total!=null?hms(r.total):"&nbsp;")+'</em><button class="pen" title="Edit" onclick="edit(\''+r.id+'\')">✏️</button></div>'+
- '<div class="box"><b>Break (max 1h)</b><em>'+hms(s.b)+'</em></div><div class="box" style="border-color:var(--ok)"><b>Salary Hours</b><em>'+hms(s.v)+'</em><span style="font-size:11px;color:var(--c3)">from '+s.k+' − break</span></div></div></div>'}
-function render(){const app=document.getElementById("app");clearInterval(tick);
- if(!user()){app.innerHTML='<header><div><h1>Duty Shift Counter</h1><small>Track your shifts with precision</small></div></header><div class="card" style="max-width:420px;margin:30px auto"><div class="tabs"><button class="btn '+(tab=="login"?"on":"")+'" onclick="tab=\'login\';msg=\'\';render()">Login</button><button class="btn '+(tab=="reg"?"on":"")+'" onclick="tab=\'reg\';msg=\'\';render()">Register</button></div>'+
-  (tab=="login"?'<label>Genex ID</label><input id="li" placeholder="Enter Genex ID"><button class="btn o" style="width:100%" onclick="login()">Login</button>':'<label>Name</label><input id="rn" placeholder="Full name"><label>Genex ID</label><input id="ri" placeholder="Genex ID"><button class="btn o" style="width:100%" onclick="reg()">Submit</button>')+(msg?'<div class="warn">'+msg+'</div>':'')+'</div>';return}
- const a=S.active[cur],locked=!!a,d=a?a.date:sel.date,ed=a?a.end:sel.end,si=a?a.shift:sel.shift;
- let h='<header><div><h1>Duty Shift Counter</h1><small>'+esc(user().name)+' · '+esc(cur)+'</small></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn g" style="color:var(--bad);border-color:var(--bad)" onclick="askReset()">Reset All Data</button><button class="btn g" style="color:var(--c4);border-color:var(--c4)" onclick="logout()">Logout</button></div></header>';
- h+='<div class="card"><h2>Shift Control</h2><label>'+(si===5?"Login Date (11 PM – 12 AM)":"Date")+'</label><input type="date" value="'+d+'" '+(locked?"disabled":"")+' onchange="setDate(this.value)">'+(si===5?'<label>Logout Date (12 AM – 8 AM)</label><input type="date" value="'+ed+'" '+(locked?"disabled":"")+' onchange="setEnd(this.value)">':"")+'<label>Select Shift</label><div class="shifts">'+SH.map((s,i)=>'<div class="sh s'+i+(si===i?" sel":"")+(locked&&si!==i?" dis":"")+'" onclick="pickShift('+i+')">'+ICON[i]+'<br>'+s+'<span>'+(i>=4?"Night":"Day")+'</span></div>').join("")+'</div>'+
- (warn?'<div class="warn">'+warn+'</div>':'')+'<div class="tg"><div>On Shift <button class="sw '+(a?"on":"")+'" onclick="togOn()" aria-label="On shift"></button></div><div>Off Shift <button class="sw '+(offOn?"red":"")+'" onclick="togOff()" aria-label="Off shift"></button></div></div>'+
- (a?'<div class="clock" id="ck">00h 00m 00s</div><div class="sub">Counting since '+dt(a.start)+(a.shift===5?' · night shift: '+a.date+' → '+a.end:'')+'</div>':'<div class="sub" style="margin-top:8px">Toggle On Shift to start counting.</div>')+'</div>';
- h+='<div class="card"><h2>User Report</h2><div class="box" style="border:2px solid var(--ok);margin-bottom:12px"><b>Total Salary Hours</b><em style="font-size:22px">'+hms(S.recs.reduce((t,x)=>t+salary(x).v,0))+'</em></div><div class="bar"><div><label>From</label><input type="date" id="pf"></div><div><label>To</label><input type="date" id="pt"></div><div><button class="btn o" style="margin-bottom:10px" onclick="print_()">🖨 Print (A4)</button></div></div>';
- const us=[...S.users].sort((x,y)=>(y.id===cur)-(x.id===cur));
- us.forEach(u=>{const rs=S.recs.filter(r=>r.uid===u.id).sort((x,y)=>y.login-x.login),n=lim[u.id]||10;
-  h+='<div class="ubox"><h3>'+esc(u.name)+' <small style="font-size:13px;color:var(--c3)">'+esc(u.id)+' · Salary '+hms(S.recs.filter(x=>x.uid===u.id).reduce((t,x)=>t+salary(x).v,0))+'</small></h3>'+(rs.length?rs.slice(0,n).map(recHtml).join(""):'<div class="sub">No data yet.</div>')+(rs.length>n?'<button class="btn g" onclick="more(\''+u.id+'\')">Show more (+20)</button>':'')+'</div>'});
- h+='</div><div class="card"><h2>Activity Flow</h2>'+(S.act.length?S.act.slice(0,actLim).map(l=>'<div class="log"><i>'+dt(l.t)+'</i>'+esc(l.x)+'</div>').join(""):'<div class="sub">No activity yet.</div>')+(S.act.length>actLim?'<button class="btn g" onclick="actLim=1e9;render()">Load older data</button>':'')+'</div>';
- app.innerHTML=h;
- if(a){const u=()=>{const e=document.getElementById("ck");if(e)e.textContent=hms(Math.floor((now()-S.active[cur].start)/1000))};u();tick=setInterval(u,1000)}}
-let pend=false;
-const kick=()=>{if(!cur)return;const a=document.activeElement;if(a&&a.tagName==="INPUT"){pend=true;return}render()};
-document.addEventListener("focusout",()=>{if(pend){pend=false;setTimeout(render,80)}});
-let shown=false;const er=e=>{console.error(e);if(!shown){shown=true;alert("Database error: "+e.message+"\nCheck Realtime Database is created and Rules are published.")}};
-const arr=q=>Object.values(q.val()||{});
-db.ref("users").on("value",q=>{S.users=arr(q);kick()},er);
-db.ref("recs").on("value",q=>{S.recs=arr(q);kick()},er);
-db.ref("active").on("value",q=>{S.active=q.val()||{};kick()},er);
-db.ref("act").orderByChild("t").limitToLast(300).on("value",q=>{S.act=arr(q).sort((a,b)=>b.t-a.t);kick()},er);
-render();
+body{margin:0;font-family:Poppins,sans-serif;color:var(--ink);background:linear-gradient(180deg,#f3f9fd 0,#fff 380px) fixed;font-size:14px}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;margin:0}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 28px;background:#fff;border-bottom:3px double var(--blue2)}
+.brand{display:flex;align-items:center;gap:12px}.brand b{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:var(--mint);font:700 22px 'Cormorant Garamond',serif;color:#2f7a58}
+.brand h1{font-size:26px}.brand small{display:block;color:var(--mute);font-size:11px}
+.chip{display:flex;gap:10px;align-items:center;background:var(--blue);padding:6px 8px 6px 14px;border-radius:30px}
+button{font:inherit;cursor:pointer}
+.btn{border:0;border-radius:10px;padding:9px 18px;background:var(--mint-d);color:#fff;font-weight:500}.btn.ghost{background:var(--blue);color:var(--ink)}.btn.sm{padding:5px 12px;font-size:12px}
+main{max-width:1020px;margin:26px auto;padding:0 16px;display:grid;gap:22px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 6px 24px rgba(79,140,180,.08)}
+.card>h2{font-size:26px;margin-bottom:4px}.sub{color:var(--mute);font-size:12px;margin-bottom:16px}
+.auth{max-width:420px;margin:60px auto}.tabs{display:flex;background:var(--blue);border-radius:12px;padding:4px;margin:14px 0}
+.tabs button{flex:1;border:0;background:none;padding:8px;border-radius:9px;color:var(--mute)}.tabs .on{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 4px #0001}
+label{display:block;font-size:12px;color:var(--mute);margin:12px 0 5px}
+input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;color:var(--ink);background:#fbfdff}input:focus{outline:2px solid var(--blue2)}
+.msg{color:var(--red);font-size:12px;min-height:18px;margin-top:8px}
+.shifts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.sh{border:2px solid transparent;border-radius:16px;padding:14px 10px;text-align:center;font-weight:500;line-height:1.3;transition:.15s}
+.sh span{display:block;font-size:24px;margin-bottom:4px}.sh:hover{transform:translateY(-2px)}
+.sh.sel{border-color:var(--mint-d);box-shadow:0 0 0 4px #4fa77e26}.sh:disabled{opacity:.55;cursor:not-allowed}
+.dates{display:flex;gap:16px;flex-wrap:wrap}.dates>div{flex:1;min-width:210px}
+.console{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;margin-top:20px;align-items:center}
+.clock{background:linear-gradient(135deg,var(--blue),#f1fbf5);border:1px solid var(--line);border-radius:18px;padding:22px;text-align:center}
+.clock .t{font:700 54px 'Cormorant Garamond',serif;letter-spacing:2px}.clock small{color:var(--mute)}
+.tgs{display:grid;gap:14px}.tgrow{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:14px}
+.tg{width:58px;height:30px;border-radius:30px;background:#cdd9e2;position:relative;cursor:pointer;transition:.2s}
+.tg i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px #0003;transition:.2s}
+.tg.on{background:var(--mint-d)}.tg.on i{left:31px}
+.rep{margin-top:18px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.rep>h3{padding:12px 16px;background:var(--blue);font-size:21px;display:flex;justify-content:space-between;align-items:center}
+.rep h3 small{font:400 11px Poppins;color:var(--mute)}
+.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:700px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mute);font-weight:500;background:#fafdff}
+.sal{background:var(--mint);padding:3px 10px;border-radius:20px;font-weight:600}
+.ed{border:0;background:var(--blue);border-radius:8px;width:30px;height:28px}
+.more{display:block;margin:12px auto}.run{color:var(--mint-d);font-weight:600}
+.pbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.pbar div{width:170px}
+.act{list-style:none;padding:0;margin:0}.act li{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.act li:before{content:"";width:10px;height:10px;margin-top:5px;border-radius:50%;background:var(--mint-d);box-shadow:0 0 0 4px var(--mint);flex:none}
+.act small{color:var(--mute);display:block}
+#modal{position:fixed;inset:0;background:#1d37484d;display:none;place-items:center;z-index:9;padding:16px}
+#modal.show{display:grid}.box{background:#fff;border-radius:18px;padding:24px;max-width:420px;width:100%}.box h3{font-size:26px;margin-bottom:8px}
+.btns{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(90px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:12px;transition:.3s;z-index:10}
+#toast.show{transform:translateX(-50%)}
+#pa{display:none}
+@media(max-width:700px){.console{grid-template-columns:1fr}.clock .t{font-size:42px}header{padding:12px 16px}}
+@media print{@page{size:A4;margin:12mm}body>*:not(#pa){display:none!important}#pa{display:block;color:#000}#pa h2{font-size:22px}#pa table{min-width:0;font-size:10.5px;margin-bottom:16px}#pa h3{margin:14px 0 6px;font-size:16px}}
+</style></head>
+<body>
+<header><div class="brand"><b>G</b><div><h1>Genex Duty Tracker</h1><small>Shift hours, counted to the second</small></div></div><div id="hu"></div></header>
+<main id="app"></main>
+<div id="modal"><div class="box" id="mbox"></div></div><div id="toast"></div><div id="pa"></div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getDatabase,ref,set,push,update,onValue,get} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const db=getDatabase(initializeApp({
+  apiKey:"AIzaSyCEnSE_jPPgTRzbrOQlROSXCN2soAToEiE",authDomain:"genex-dc660.firebaseapp.com",
+  databaseURL:"https://genex-dc660-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"genex-dc660",
+  storageBucket:"genex-dc660.firebasestorage.app",messagingSenderId:"36849681934",appId:"1:36849681934:web:bf5fcf8a779602a83f9e5f"}));
+
+const SHIFTS=[
+ {id:"8-17",l:"8 AM – 5 PM",c:"#fff2b3",i:"🌅"},{id:"9-18",l:"9 AM – 6 PM",c:"#ffe3b8",i:"☀️"},
+ {id:"10-19",l:"10 AM – 7 PM",c:"#cfe9fb",i:"🌤️"},{id:"11-20",l:"11 AM – 8 PM",c:"#c9f0ea",i:"🌞"},
+ {id:"14-23",l:"2 PM – 11 PM",c:"#ddd3f6",i:"🌇"},{id:"23-8",l:"11 PM – 8 AM",c:"#b9c6ee",i:"🌙",night:1}];
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const p2=n=>String(n).padStart(2,"0"),ymd=d=>`${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+const dur=s=>{s=Math.max(0,Math.floor(s));return `${p2(Math.floor(s/3600))}:${p2(Math.floor(s%3600/60))}:${p2(s%60)}`};
+const fd=s=>new Date(s+"T00:00").toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+const ft=t=>new Date(t).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+const loc=t=>{const d=new Date(t);return `${ymd(d)}T${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`};
+const next=s=>{const d=new Date(s+"T00:00");d.setDate(d.getDate()+1);return ymd(d)};
+const dateFor=(s,t)=>!s.night?s.d1:(ymd(new Date(t))<=s.d1?s.d1:s.d2);
+const dt=(s,t)=>`${fd(dateFor(s,t))} · ${ft(t)}`;
+
+let me=localStorage.getItem("gx"),users={},sess={},acts={},sel=null,d1="",d2="",active=null,shown={},allActs=false,mode="reg";
+const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove("show"),2600)};
+const modal=h=>{$("#mbox").innerHTML=h;$("#modal").classList.add("show")},closeM=()=>$("#modal").classList.remove("show");
+const log=(text)=>push(ref(db,"activity"),{ts:Date.now(),gid:me,name:users[me]?.name||me,text});
+const clean=s=>s.trim().replace(/[.#$\[\]\/]/g,"-");
+
+onValue(ref(db,"users"),s=>{users=s.val()||{};draw()});
+onValue(ref(db,"sessions"),s=>{sess=s.val()||{};active=null;for(const[k,v]of Object.entries(sess))if(v.gid===me&&v.status==="on")active={k,...v};draw()});
+onValue(ref(db,"activity"),s=>{acts=s.val()||{};if(me&&users[me])drawAct()});
+
+function draw(){
+  if(!me||!users[me]){me=me&&users[me]?me:null;return drawAuth()}
+  $("#hu").innerHTML=`<div class="chip"><span>${esc(users[me].name)} · ${esc(me)}</span><button class="btn ghost sm" data-a="out">Log out</button></div>`;
+  if(!$("#console")){$("#app").innerHTML=`<section class="card" id="console"></section><section class="card" id="rp"></section><section class="card" id="ac"></section>`}
+  if(active){sel=SHIFTS.find(x=>x.id===active.shift);d1=active.d1;d2=active.d2||""}
+  drawConsole();drawRep();drawAct();
+}
+function drawAuth(){
+  $("#hu").innerHTML="";
+  $("#app").innerHTML=`<section class="card auth"><h2>Welcome</h2><div class="sub">Register once, then log in with your Genex ID only.</div>
+  <div class="tabs"><button data-a="tab" data-m="reg" class="${mode=="reg"?"on":""}">Register</button><button data-a="tab" data-m="log" class="${mode=="log"?"on":""}">Log in</button></div>
+  ${mode=="reg"?`<label>Name</label><input id="nm" placeholder="Your full name">`:""}
+  <label>Genex ID</label><input id="gid" placeholder="e.g. GX1024"><div class="msg" id="am"></div>
+  <button class="btn" style="width:100%;margin-top:6px" data-a="${mode=="reg"?"reg":"login"}">${mode=="reg"?"Create my slot":"Log in"}</button></section>`;
+}
+function drawConsole(){
+  const night=sel?.night,on=!!active;
+  $("#console").innerHTML=`<h2>Duty console</h2><div class="sub">Pick a shift and date, then switch on when your duty starts.</div>
+  <div class="shifts">${SHIFTS.map(s=>`<button class="sh ${sel?.id==s.id?"sel":""}" style="background:${s.c}" data-a="shift" data-id="${s.id}" ${on?"disabled":""}><span>${s.i}</span>${s.l}</button>`).join("")}</div>
+  <div class="dates" style="margin-top:6px"><div><label>${night?"Date for 11 PM – 11:59 PM":"Duty date"}</label><input type="date" id="d1" value="${d1}" ${on?"disabled":""}></div>
+  ${night?`<div><label>Date for 12 AM – 8 AM (next day)</label><input type="date" id="d2" value="${d2}" ${on?"disabled":""}></div>`:""}</div>
+  <div class="console"><div class="clock"><div class="t" id="clk">00:00:00</div><small id="cs">${on?esc(active.label):"Shift is off"}</small></div>
+  <div class="tgs"><div class="tgrow"><div><b>On shift</b><br><small style="color:var(--mute)">Starts the live counter</small></div><div class="tg ${on?"on":""}" data-a="on"><i></i></div></div>
+  <div class="tgrow"><div><b>Off shift</b><br><small style="color:var(--mute)">Closes the day and saves it</small></div><div class="tg" data-a="off"><i></i></div></div></div></div>`;
+  tick();
+}
+const tick=()=>{const c=$("#clk");if(c&&active)c.textContent=dur((Date.now()-active.loginTs)/1000)};setInterval(tick,1000);
+
+const salary=s=>s.totalSec!=null?s.totalSec:s.rawSec;
+function rows(list){return list.map(s=>`<tr><td>${esc(fd(s.d1))}</td><td>${esc(s.label)}</td><td>${dt(s,s.loginTs)}</td>
+ <td>${s.logoutTs?dt(s,s.logoutTs):`<span class="run">Running</span>`}</td><td>${s.rawSec!=null?dur(s.rawSec):"—"}</td>
+ <td>${s.totalSec!=null?dur(s.totalSec)+" ":""}${s.logoutTs?`<button class="ed" title="Edit" data-a="edit" data-k="${s.k}">✎</button>`:""}</td>
+ <td>${s.rawSec!=null?`<span class="sal">${dur(salary(s))}</span>`:"—"}</td></tr>`).join("")}
+const head=`<thead><tr><th>Date</th><th>Shift</th><th>Login time</th><th>Logout time</th><th>Raw</th><th>Total hours</th><th>Salary hours</th></tr></thead>`;
+const byUser=g=>Object.entries(sess).filter(([,v])=>v.gid===g).map(([k,v])=>({k,...v})).sort((a,b)=>b.loginTs-a.loginTs);
+function drawRep(){
+  const ids=[me,...Object.keys(users).filter(u=>u!==me)];
+  $("#rp").innerHTML=`<h2>User reports</h2><div class="sub">Latest 10 duty days per user. Older days stay hidden until you ask, and print always includes everything.</div>
+  <div class="pbar"><div><label>Print from</label><input type="date" id="pf"></div><div><label>Print to</label><input type="date" id="pt"></div><button class="btn" data-a="print">Print A4</button></div>
+  ${ids.map(g=>{const all=byUser(g),days=[...new Set(all.map(s=>s.d1))].sort().reverse(),n=shown[g]||10,vis=new Set(days.slice(0,n)),list=all.filter(s=>vis.has(s.d1));
+   return `<div class="rep"><h3>${esc(users[g].name)} <small>${esc(g)} · ${days.length} duty days</small></h3>
+   ${list.length?`<div class="wrap"><table>${head}<tbody>${rows(list)}</tbody></table></div>`:`<p style="padding:16px;color:var(--mute)">No duty recorded yet.</p>`}
+   ${days.length>n?`<button class="btn ghost sm more" data-a="more" data-g="${esc(g)}">Show more (${Math.min(20,days.length-n)} days)</button>`:""}</div>`}).join("")}`;
+}
+function drawAct(){
+  if(!$("#ac"))return;
+  const l=Object.values(acts).sort((a,b)=>b.ts-a.ts),v=allActs?l:l.slice(0,10);
+  $("#ac").innerHTML=`<h2>Activity flow</h2><div class="sub">Everything that changed, newest first.</div>
+  <ul class="act">${v.map(a=>`<li><div>${esc(a.name)} (${esc(a.gid)}) ${esc(a.text)}<small>${new Date(a.ts).toLocaleString("en-GB")}</small></div></li>`).join("")||"<li>No activity yet.</li>"}</ul>
+  ${!allActs&&l.length>10?`<button class="btn ghost sm more" data-a="older">Load older data</button>`:""}`;
+}
+
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("[data-a]");if(!t)return;const a=t.dataset.a;
+  if(a=="tab"){mode=t.dataset.m;drawAuth()}
+  if(a=="reg"){const n=$("#nm").value.trim(),g=clean($("#gid").value);if(!n||!g)return $("#am").textContent="Enter your name and Genex ID.";
+    if((await get(ref(db,"users/"+g))).exists())return $("#am").textContent="This Genex ID is already registered. Use Log in.";
+    await set(ref(db,"users/"+g),{name:n,at:Date.now()});me=g;localStorage.setItem("gx",g);await log("registered");toast("Registered. Welcome!")}
+  if(a=="login"){const g=clean($("#gid").value);if(!g)return $("#am").textContent="Enter your Genex ID.";
+    if(!(await get(ref(db,"users/"+g))).exists())return $("#am").textContent="Genex ID not found. Please register first.";
+    me=g;localStorage.setItem("gx",g);users[g]={name:(await get(ref(db,"users/"+g+"/name"))).val()};await log("logged in");draw()}
+  if(a=="out"){localStorage.removeItem("gx");me=null;sel=null;d1=d2="";$("#console")&&($("#app").innerHTML="");mode="log";drawAuth()}
+  if(a=="shift"){sel=SHIFTS.find(x=>x.id==t.dataset.id);if(d1&&sel.night&&!d2)d2=next(d1);drawConsole()}
+  if(a=="on"){if(active)return;if(!sel||!d1||(sel.night&&!d2))return toast("Select the Date & Shift first");
+    const rec={gid:me,shift:sel.id,label:sel.l,night:!!sel.night,d1,d2:sel.night?d2:null,loginTs:Date.now(),status:"on"};
+    await push(ref(db,"sessions"),rec);await log(`started ${sel.l} on ${fd(d1)}`)}
+  if(a=="off"){if(!active)return toast("Turn on shift first");
+    modal(`<h3>Day close</h3><p>Close ${esc(fd(active.d1))} (${esc(active.label)}) and save this duty?</p><div class="btns"><button class="btn ghost" data-a="no">No</button><button class="btn" data-a="yes">Yes, close day</button></div>`)}
+  if(a=="no")closeM();
+  if(a=="yes"){const o=active,now=Date.now();closeM();sel=null;d1=d2="";
+    await update(ref(db,"sessions/"+o.k),{logoutTs:now,rawSec:Math.floor((now-o.loginTs)/1000),status:"closed"});
+    await log(`closed day ${fd(o.d1)} (${o.label}) · ${dur((now-o.loginTs)/1000)}`);toast("Day closed and saved")}
+  if(a=="more"){shown[t.dataset.g]=(shown[t.dataset.g]||10)+20;drawRep()}
+  if(a=="older"){allActs=true;drawAct()}
+  if(a=="edit"){const s=sess[t.dataset.k];modal(`<h3>Adjust hours</h3><label>Login time</label><input type="datetime-local" step="1" id="el" value="${loc(s.loginTs)}">
+    <label>Logout time</label><input type="datetime-local" step="1" id="eo" value="${loc(s.logoutTs)}"><div class="msg" id="em"></div>
+    <div class="btns"><button class="btn ghost" data-a="no">Cancel</button><button class="btn ghost" data-a="stot" data-k="${t.dataset.k}">Save total hours</button><button class="btn" data-a="sraw" data-k="${t.dataset.k}">Submit raw</button></div>`)}
+  if(a=="stot"||a=="sraw"){const l=new Date($("#el").value).getTime(),o=new Date($("#eo").value).getTime();
+    if(!(o>l))return $("#em").textContent="Logout must be after login.";const k=t.dataset.k,s=sess[k],sec=Math.floor((o-l)/1000);
+    if(a=="stot"){await update(ref(db,"sessions/"+k),{totalSec:sec});await log(`set total hours ${dur(sec)} for ${fd(s.d1)}`)}
+    else{await update(ref(db,"sessions/"+k),{loginTs:l,logoutTs:o,rawSec:sec,totalSec:null});await log(`submitted raw ${dur(sec)} for ${fd(s.d1)}`)}
+    closeM();toast("Saved")}
+  if(a=="print"){const f=$("#pf").value,to=$("#pt").value;if(!f||!to)return toast("Select the print date range");
+    $("#pa").innerHTML=`<h2>Genex Duty Report</h2><p>${fd(f)} to ${fd(to)}</p>`+Object.keys(users).map(g=>{
+      const l=byUser(g).filter(s=>s.d1>=f&&s.d1<=to).reverse();if(!l.length)return"";
+      const tot=l.filter(s=>s.rawSec!=null).reduce((x,s)=>x+salary(s),0);
+      return `<h3>${esc(users[g].name)} (${esc(g)}) — salary hours ${dur(tot)}</h3><table>${head}<tbody>${rows(l).replace(/<button.*?<\/button>/g,"")}</tbody></table>`}).join("")||"<p>No data in this range.</p>";
+    window.print()}
+});
+document.addEventListener("change",e=>{
+  if(e.target.id=="d1"){d1=e.target.value;if(sel?.night)d2=d1?next(d1):"";drawConsole()}
+  if(e.target.id=="d2")d2=e.target.value;
+});
 </script></body></html>
