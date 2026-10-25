@@ -55,14 +55,14 @@ label{font-size:13px;font-weight:700;color:var(--c4)}
 </style></head><body>
 <div class="wrap" id="app"></div><div id="pr"></div><div id="md"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 const SH=["8 AM - 5 PM","9 AM - 6 PM","10 AM - 7 PM","11 AM - 8 PM","2 PM - 11 PM","11 PM - 8 AM"];
 const ICON=["☀️","🌤️","🌞","🌇","🌆","🌙"];
-firebase.initializeApp({apiKey:"AIzaSyCEnSE_jPPgTRzbrOQlROSXCN2soAToEiE",authDomain:"genex-dc660.firebaseapp.com",projectId:"genex-dc660",storageBucket:"genex-dc660.firebasestorage.app",messagingSenderId:"36849681934",appId:"1:36849681934:web:bf5fcf8a779602a83f9e5f"});
-const db=firebase.firestore();db.settings({experimentalForceLongPolling:true,merge:true});
-const nid=x=>x.trim().toUpperCase().replace(/[\/\s]/g,"");
-const fsRec=x=>db.collection("recs").doc(x.id).set(x);
+firebase.initializeApp({apiKey:"AIzaSyCEnSE_jPPgTRzbrOQlROSXCN2soAToEiE",authDomain:"genex-dc660.firebaseapp.com",databaseURL:"https://genex-dc660-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"genex-dc660",storageBucket:"genex-dc660.firebasestorage.app",messagingSenderId:"36849681934",appId:"1:36849681934:web:bf5fcf8a779602a83f9e5f"});
+const db=firebase.database();
+const nid=x=>x.trim().toUpperCase().replace(/[\/\s.#$\[\]]/g,"");
+const fsRec=x=>db.ref("recs/"+x.id).set(x);
 let offOn=false;let S={users:[],recs:[],act:[],active:{}},cur=null,sel=newSel(),lim={},actLim=10,warn="",tab="login",msg="",tick=null;
 try{cur=localStorage.getItem("dsc_cur")}catch(e){}
 const save=()=>{};
@@ -73,7 +73,7 @@ const dt=t=>{if(!t)return"—";const d=new Date(t),h=d.getHours();return d.toLoc
 const hms=s=>p2(Math.floor(s/3600))+"h "+p2(Math.floor(s%3600/60))+"m "+p2(s%60)+"s";
 const loc=t=>{const d=new Date(t);return ymd(d)+"T"+p2(d.getHours())+":"+p2(d.getMinutes())};
 const now=()=>Date.now();
-const log=t=>{db.collection("act").add({t:now(),x:t}).catch(()=>{})};
+const log=t=>{db.ref("act").push({t:now(),x:t}).catch(()=>{})};
 const user=()=>S.users.find(u=>u.id===cur);
 const DUTY=8*3600,BRK=3600;
 function nd(x){const d=new Date(x+"T00:00");d.setDate(d.getDate()+1);return ymd(d)}
@@ -81,13 +81,13 @@ function newSel(){const d=ymd(new Date());return{date:d,shift:null,end:nd(d)}}
 const salary=r=>{const base=r.total!=null?r.total:r.raw,k=r.total!=null?"Total Hours":"Raw",brk=Math.min(Math.max(base-DUTY,0),BRK);return{v:base-brk,b:brk,k}};
 async function reg(){const n=v("rn").trim(),id=nid(v("ri"));
  if(!n||!id)return setMsg("Name & Genex ID are required.");
- try{const d=await db.collection("users").doc(id).get();
- if(d.exists)return setMsg("This Genex ID is already registered. Please login.");
- await db.collection("users").doc(id).set({name:n,id});S.users.push({name:n,id});cur=id;try{localStorage.setItem("dsc_cur",id)}catch(e){}log(n+" ("+id+") registered");msg="";render()}catch(e){setMsg("Database error: "+e.message)}}
+ try{const d=await db.ref("users/"+id).get();
+ if(d.exists())return setMsg("This Genex ID is already registered. Please login.");
+ await db.ref("users/"+id).set({name:n,id});S.users.push({name:n,id});cur=id;try{localStorage.setItem("dsc_cur",id)}catch(e){}log(n+" ("+id+") registered");msg="";render()}catch(e){setMsg("Database error: "+e.message)}}
 async function login(){const id=nid(v("li"));
- try{const d=await db.collection("users").doc(id).get();
- if(!d.exists)return setMsg("Genex ID not found. Please register first.");
- if(!S.users.some(u=>u.id===id))S.users.push(d.data());cur=id;try{localStorage.setItem("dsc_cur",id)}catch(e){}msg="";log(user().name+" logged in");render()}catch(e){setMsg("Database error: "+e.message)}}
+ try{const d=await db.ref("users/"+id).get();
+ if(!d.exists())return setMsg("Genex ID not found. Please register first.");
+ if(!S.users.some(u=>u.id===id))S.users.push(d.val());cur=id;try{localStorage.setItem("dsc_cur",id)}catch(e){}msg="";log(user().name+" logged in");render()}catch(e){setMsg("Database error: "+e.message)}}
 function logout(){cur=null;try{localStorage.removeItem("dsc_cur")}catch(e){}render()}
 const v=i=>document.getElementById(i).value;
 function setMsg(m){msg=m;render()}
@@ -98,17 +98,17 @@ function togOn(){const a=S.active[cur];if(a)return;
  if(!sel.date||sel.shift===null){warn="Select the Date & Shift first";return render()}
  if(sel.shift===5&&(!sel.end||sel.end<=sel.date)){warn="Logout Date must be after Login Date";return render()}
  const en=sel.shift===5?sel.end:"";
- S.active[cur]={shift:sel.shift,date:sel.date,end:en,start:now()};db.collection("active").doc(cur).set(S.active[cur]);log(user().name+" went ON shift ("+SH[sel.shift]+", "+sel.date+(en?" → "+en:"")+")");render()}
+ S.active[cur]={shift:sel.shift,date:sel.date,end:en,start:now()};db.ref("active/"+cur).set(S.active[cur]);log(user().name+" went ON shift ("+SH[sel.shift]+", "+sel.date+(en?" → "+en:"")+")");render()}
 function togOff(){const a=S.active[cur];
  if(!a){warn="Select the Date & Shift first";return render()}
  offOn=true;render();modal('<h2>Day Close</h2><p>Do you want to close <b>'+a.date+(a.end?' → '+a.end:'')+'</b> ('+SH[a.shift]+') and save the data?</p><div class="row"><button class="btn g" onclick="closeM()">No</button><button class="btn o" onclick="yes()">Yes, Close</button></div>')}
 function yes(){const a=S.active[cur],e=now();
  const R={id:"r"+e,uid:cur,date:a.date,end:a.end||"",shift:a.shift,login:a.start,logout:e,raw:Math.round((e-a.start)/1000),total:null,sub:false};S.recs.push(R);fsRec(R);
- delete S.active[cur];db.collection("active").doc(cur).delete();log(user().name+" closed day "+a.date+" ("+SH[a.shift]+")");save();sel=newSel();closeM()}
+ delete S.active[cur];db.ref("active/"+cur).remove();log(user().name+" closed day "+a.date+" ("+SH[a.shift]+")");save();sel=newSel();closeM()}
 function askReset(){modal('<h2>Reset All Data</h2><p>This will permanently delete <b>all users, reports and activity</b> for everyone. This cannot be undone.</p><label>Enter password to confirm</label><input id="rs" type="password" placeholder="Password" autocomplete="off"><div class="row"><button class="btn g" onclick="closeM()">Cancel</button><button class="btn" style="background:var(--bad)" onclick="doReset()">Delete Everything</button></div>')}
 async function sha(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("")}
 async function doReset(){if(await sha(v("rs"))!=="8d98c62e4d63f544e397201fe75b39dc5ca11c0151b6daba6b39d0bb4cc3f803"){alert("Wrong password.");return}
- try{for(const c of ["users","recs","active","act"]){const q=await db.collection(c).get();let i=0;while(i<q.docs.length){const b=db.batch();q.docs.slice(i,i+400).forEach(d=>b.delete(d.ref));await b.commit();i+=400}}
+ try{for(const c of ["users","recs","active","act"])await db.ref(c).remove();
  S={users:[],recs:[],act:[],active:{}};cur=null;try{localStorage.removeItem("dsc_cur")}catch(e){}sel=newSel();lim={};actLim=10;closeM();alert("All data has been reset.")}catch(e){alert("Reset failed: "+e.message)}}
 function modal(h){document.getElementById("md").innerHTML='<div class="modal"><div class="card">'+h+'</div></div>'}
 function closeM(){document.getElementById("md").innerHTML="";offOn=false;render()}
@@ -148,10 +148,11 @@ function render(){const app=document.getElementById("app");clearInterval(tick);
 let pend=false;
 const kick=()=>{if(!cur)return;const a=document.activeElement;if(a&&a.tagName==="INPUT"){pend=true;return}render()};
 document.addEventListener("focusout",()=>{if(pend){pend=false;setTimeout(render,80)}});
-let shown=false;const er=e=>{console.error(e);if(!shown){shown=true;alert("Database error: "+e.message+"\nCheck Firestore is created and Rules are published.")}};
-db.collection("users").onSnapshot(q=>{S.users=q.docs.map(d=>d.data());kick()},er);
-db.collection("recs").onSnapshot(q=>{S.recs=q.docs.map(d=>d.data());kick()},er);
-db.collection("active").onSnapshot(q=>{S.active={};q.docs.forEach(d=>S.active[d.id]=d.data());kick()},er);
-db.collection("act").orderBy("t","desc").limit(300).onSnapshot(q=>{S.act=q.docs.map(d=>d.data());kick()},er);
+let shown=false;const er=e=>{console.error(e);if(!shown){shown=true;alert("Database error: "+e.message+"\nCheck Realtime Database is created and Rules are published.")}};
+const arr=q=>Object.values(q.val()||{});
+db.ref("users").on("value",q=>{S.users=arr(q);kick()},er);
+db.ref("recs").on("value",q=>{S.recs=arr(q);kick()},er);
+db.ref("active").on("value",q=>{S.active=q.val()||{};kick()},er);
+db.ref("act").orderByChild("t").limitToLast(300).on("value",q=>{S.act=arr(q).sort((a,b)=>b.t-a.t);kick()},er);
 render();
 </script></body></html>
