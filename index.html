@@ -36,15 +36,19 @@ input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10
 .rep{margin-top:18px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .rep>h3{padding:12px 16px;background:var(--blue);font-size:21px;display:flex;justify-content:space-between;align-items:center}
 .rep h3 small{font:400 11px Poppins;color:var(--mute)}
-.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:900px}
+.wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:1050px}
 th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mute);font-weight:500;background:#fafdff}
 .sal{background:var(--mint);padding:3px 10px;border-radius:20px;font-weight:600}
 .brk{background:#ffe3b8;padding:3px 10px;border-radius:20px;font-weight:600}
+.ext{background:#e6dcf7;padding:3px 10px;border-radius:20px;font-weight:600}
+.dl{border:0;background:#fde4e4;border-radius:8px;width:30px;height:28px;margin-left:4px}
+.btn.red{background:var(--red)}
+.adm{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.adm div{width:170px}
 .tot{background:var(--blue2);padding:3px 10px;border-radius:20px;font-weight:600}
-.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.sum{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
 .sum div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:center}
 .sum small{display:block;color:var(--mute);font-size:11px}.sum b{font:700 22px 'Cormorant Garamond',serif}
-.sum .s{background:var(--mint)}.sum .b{background:#ffe3b8}.sum .t{background:var(--blue2)}
+.sum .x{background:#e6dcf7}.sum .s{background:var(--mint)}.sum .b{background:#ffe3b8}.sum .t{background:var(--blue2)}
 .ed{border:0;background:var(--blue);border-radius:8px;width:30px;height:28px}
 .more{display:block;margin:12px auto}.run{color:var(--mint-d);font-weight:600}
 .pbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.pbar div{width:170px}
@@ -57,7 +61,7 @@ th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white
 #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(90px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:12px;transition:.3s;z-index:10}
 #toast.show{transform:translateX(-50%)}
 #pa{display:none}
-@media(max-width:700px){.console{grid-template-columns:1fr}.clock .t{font-size:42px}header{padding:12px 16px}}
+@media(max-width:700px){.sum{grid-template-columns:repeat(2,1fr)}.console{grid-template-columns:1fr}.clock .t{font-size:42px}header{padding:12px 16px}}
 @media print{@page{size:A4;margin:12mm}body>*:not(#pa){display:none!important}#pa{display:block;color:#000}#pa h2{font-size:22px}#pa table{min-width:0;font-size:10.5px;margin-bottom:16px}#pa h3{margin:14px 0 6px;font-size:16px}}
 </style></head>
 <body>
@@ -110,7 +114,8 @@ onValue(ref(db,"activity"),s=>{acts=s.val()||{};if(me&&users[me])drawAct()},()=>
 function draw(){
   if(!me||!users[me]){if(me&&!usersLoaded)return;if(!$("#gid"))drawAuth();return}
   $("#hu").innerHTML=`<div class="chip"><span>${esc(users[me].name)} · ${esc(me)}</span><button class="btn ghost sm" data-a="out">Log out</button></div>`;
-  if(!$("#console")){$("#app").innerHTML=`<section class="card" id="console"></section><section class="card" id="rp"></section><section class="card" id="ac"></section>`}
+  if(!$("#console")){$("#app").innerHTML=`<section class="card" id="console"></section><section class="card" id="rp"></section><section class="card" id="ad"><h2>Admin tools</h2><div class="sub">Delete old data by date range, or wipe everything. Admin password required.</div>
+  <div class="adm"><div><label>Delete from</label><input type="date" id="df"></div><div><label>Delete to</label><input type="date" id="dto"></div><button class="btn red" data-a="dr">Delete data in range</button><button class="btn red" data-a="da">Delete ALL data</button></div></section><section class="card" id="ac"></section>`}
   if(active){sel=SHIFTS.find(x=>x.id===active.shift);d1=active.d1;d2=active.d2||""}
   drawConsole();drawRep();drawAct();
 }
@@ -137,14 +142,16 @@ const tick=()=>{const c=$("#clk");if(c&&active)c.textContent=dur((Date.now()-act
 
 const salary=s=>s.totalSec!=null?s.totalSec:s.rawSec;
 const KPI=8*3600;
-const calc=s=>{const w=salary(s),k=Math.min(w,KPI),b=Math.max(0,w-KPI);return{k,b,t:k+b}};
-const sumBox=l=>{const c=l.filter(s=>s.rawSec!=null).map(calc),k=c.reduce((x,y)=>x+y.k,0),b=c.reduce((x,y)=>x+y.b,0);
- return `<div class="sum"><div class="s"><small>Salary hours (KPI 8h/day)</small><b>${dur(k)}</b></div><div class="b"><small>Break hours</small><b>${dur(b)}</b></div><div class="t"><small>Total hours (Salary + Break)</small><b>${dur(k+b)}</b></div></div>`};
+const ADMIN="102216gen";
+const calc=s=>{const w=salary(s),k=Math.min(w,KPI),b=Math.max(0,w-KPI),x=s.extraSec||0;return{k,b,x,t:k+b+x}};
+const sumBox=l=>{const c=l.filter(s=>s.rawSec!=null).map(calc),k=c.reduce((x,y)=>x+y.k,0),b=c.reduce((x,y)=>x+y.b,0),e=c.reduce((x,y)=>x+y.x,0);
+ return `<div class="sum"><div class="s"><small>Salary hours (KPI 8h/day)</small><b>${dur(k)}</b></div><div class="b"><small>Break hours</small><b>${dur(b)}</b></div><div class="x"><small>Extra hours</small><b>${dur(e)}</b></div><div class="t"><small>Total hours (Salary + Break + Extra)</small><b>${dur(k+b+e)}</b></div></div>`};
 function rows(list){return list.map(s=>`<tr><td>${esc(fd(s.d1))}</td><td>${esc(s.label)}</td><td>${dt(s,s.loginTs)}</td>
  <td>${s.logoutTs?dt(s,s.logoutTs):`<span class="run">Running</span>`}</td><td>${s.rawSec!=null?dur(s.rawSec):"—"}</td>
- <td>${s.totalSec!=null?dur(s.totalSec)+" ":""}${s.logoutTs?`<button class="ed" title="Edit" data-a="edit" data-k="${s.k}">✎</button>`:""}</td>
- <td>${s.rawSec!=null?`<span class="sal">${dur(calc(s).k)}</span>`:"—"}</td><td>${s.rawSec!=null?`<span class="brk">${dur(calc(s).b)}</span>`:"—"}</td><td>${s.rawSec!=null?`<span class="tot">${dur(calc(s).t)}</span>`:"—"}</td></tr>`).join("")}
-const head=`<thead><tr><th>Date</th><th>Shift</th><th>Login time</th><th>Logout time</th><th>Raw</th><th>Adjusted</th><th>Salary hours (KPI)</th><th>Break hours</th><th>Total hours</th></tr></thead>`;
+ <td>${s.totalSec!=null?dur(s.totalSec):"—"}</td>
+ <td>${s.rawSec!=null?`<span class="sal">${dur(calc(s).k)}</span>`:"—"}</td><td>${s.rawSec!=null?`<span class="brk">${dur(calc(s).b)}</span>`:"—"}</td><td>${s.rawSec!=null?(calc(s).x?`<span class="ext">${dur(calc(s).x)}</span>`:"—"):"—"}</td><td>${s.rawSec!=null?`<span class="tot">${dur(calc(s).t)}</span>`:"—"}</td>
+ <td class="ac">${s.logoutTs?`<button class="ed" title="Edit / Extra hours" data-a="edit" data-k="${s.k}">✎</button>`:""}<button class="dl" title="Delete this day" data-a="dd" data-k="${s.k}">🗑</button></td></tr>`).join("")}
+const head=`<thead><tr><th>Date</th><th>Shift</th><th>Login time</th><th>Logout time</th><th>Raw</th><th>Adjusted</th><th>Salary hours (KPI)</th><th>Break hours</th><th>Extra hours</th><th>Total hours</th><th>Action</th></tr></thead>`;
 const byUser=g=>Object.entries(sess).filter(([,v])=>v.gid===g).map(([k,v])=>({k,...v})).sort((a,b)=>b.loginTs-a.loginTs);
 function drawRep(){
   const ids=[me,...Object.keys(users).filter(u=>u!==me)];
@@ -164,6 +171,9 @@ function drawAct(){
   ${!allActs&&l.length>10?`<button class="btn ghost sm more" data-a="older">Load older data</button>`:""}`;
 }
 
+const pwBox=()=>`<label>Admin password</label><input type="password" id="apw" placeholder="Enter admin password" autocomplete="off"><div class="msg" id="em"></div>`;
+const chkPw=()=>{if(($("#apw")?.value||"")!==ADMIN){$("#em").textContent="Wrong admin password.";return false}return true};
+const extraIn=()=>Math.max(0,Math.floor((+$("#xh").value||0)*3600+(+$("#xm").value||0)*60));
 document.addEventListener("click",async e=>{
   const t=e.target.closest("[data-a]");if(!t)return;const a=t.dataset.a;
   try{
@@ -188,17 +198,32 @@ document.addEventListener("click",async e=>{
   if(a=="more"){shown[t.dataset.g]=(shown[t.dataset.g]||10)+20;drawRep()}
   if(a=="older"){allActs=true;drawAct()}
   if(a=="edit"){const s=sess[t.dataset.k];modal(`<h3>Adjust hours</h3><label>Login time</label><input type="datetime-local" step="1" id="el" value="${loc(s.loginTs)}">
-    <label>Logout time</label><input type="datetime-local" step="1" id="eo" value="${loc(s.logoutTs)}"><div class="msg" id="em"></div>
-    <div class="btns"><button class="btn ghost" data-a="no">Cancel</button><button class="btn ghost" data-a="stot" data-k="${t.dataset.k}">Save total hours</button><button class="btn" data-a="sraw" data-k="${t.dataset.k}">Submit raw</button></div>`)}
-  if(a=="stot"||a=="sraw"){const l=new Date($("#el").value).getTime(),o=new Date($("#eo").value).getTime();
+    <label>Logout time</label><input type="datetime-local" step="1" id="eo" value="${loc(s.logoutTs)}"><label>Extra hours (added to Total hours)</label><div style="display:flex;gap:8px"><input type="number" min="0" id="xh" placeholder="Hours" value="${Math.floor((s.extraSec||0)/3600)}"><input type="number" min="0" max="59" id="xm" placeholder="Minutes" value="${Math.floor((s.extraSec||0)%3600/60)}"></div><div class="msg" id="em"></div>
+    <div class="btns"><button class="btn ghost" data-a="no">Cancel</button><button class="btn ghost" data-a="sx" data-k="${t.dataset.k}">Save extra only</button><button class="btn ghost" data-a="stot" data-k="${t.dataset.k}">Save total hours</button><button class="btn" data-a="sraw" data-k="${t.dataset.k}">Submit raw</button></div>`)}
+  if(a=="sx"){const k=t.dataset.k,s=sess[k],xs=extraIn();
+    await update(ref(db,"sessions/"+k),{extraSec:xs||null});await log(`set extra hours ${dur(xs)} for ${fd(s.d1)}`);closeM();toast("Extra hours saved")}
+  if(a=="stot"||a=="sraw"){const xs=extraIn(),l=new Date($("#el").value).getTime(),o=new Date($("#eo").value).getTime();
     if(!(o>l))return $("#em").textContent="Logout must be after login.";const k=t.dataset.k,s=sess[k],sec=Math.floor((o-l)/1000);
-    if(a=="stot"){await update(ref(db,"sessions/"+k),{totalSec:sec});await log(`set total hours ${dur(sec)} for ${fd(s.d1)}`)}
-    else{await update(ref(db,"sessions/"+k),{loginTs:l,logoutTs:o,rawSec:sec,totalSec:null});await log(`submitted raw ${dur(sec)} for ${fd(s.d1)}`)}
+    if(a=="stot"){await update(ref(db,"sessions/"+k),{totalSec:sec,extraSec:xs||null});await log(`set total hours ${dur(sec)} for ${fd(s.d1)}`)}
+    else{await update(ref(db,"sessions/"+k),{loginTs:l,logoutTs:o,rawSec:sec,totalSec:null,extraSec:xs||null});await log(`submitted raw ${dur(sec)} for ${fd(s.d1)}`)}
     closeM();toast("Saved")}
+  if(a=="dd"){const s=sess[t.dataset.k];if(!s)return;modal(`<h3>Delete this day?</h3><p>${esc(fd(s.d1))} · ${esc(s.label)}<br>${esc(users[s.gid]?.name||s.gid)} (${esc(s.gid)})<br><small style="color:var(--mute)">This cannot be undone.</small></p>${pwBox()}<div class="btns"><button class="btn ghost" data-a="no">Cancel</button><button class="btn red" data-a="cdd" data-k="${t.dataset.k}">Delete</button></div>`)}
+  if(a=="cdd"){if(!chkPw())return;const s=sess[t.dataset.k];await set(ref(db,"sessions/"+t.dataset.k),null);
+    await log(`deleted duty day ${s?fd(s.d1):""} (${s?s.label:""}) of ${s?s.gid:""}`);closeM();toast("Day deleted")}
+  if(a=="dr"){const f=$("#df").value,to=$("#dto").value;if(!f||!to)return toast("Select From and To dates");if(f>to)return toast("From date must be before To date");
+    const n=Object.values(sess).filter(v=>v.d1>=f&&v.d1<=to).length;if(!n)return toast("No data in this range");
+    modal(`<h3>Delete data in range</h3><p>Delete <b>${n}</b> duty record(s) from <b>${esc(fd(f))}</b> to <b>${esc(fd(to))}</b>?<br><small style="color:var(--mute)">This cannot be undone.</small></p>${pwBox()}<div class="btns"><button class="btn ghost" data-a="no">Cancel</button><button class="btn red" data-a="cdr" data-f="${esc(f)}" data-t="${esc(to)}">Delete</button></div>`)}
+  if(a=="cdr"){if(!chkPw())return;const f=t.dataset.f,to=t.dataset.t,o={};
+    for(const[k,v]of Object.entries(sess))if(v.d1>=f&&v.d1<=to)o[k]=null;
+    await update(ref(db,"sessions"),o);await log(`deleted ${Object.keys(o).length} duty record(s) from ${fd(f)} to ${fd(to)}`);closeM();toast("Data deleted")}
+  if(a=="da"){modal(`<h3>Delete ALL data?</h3><p>All duty records and the activity flow will be erased. Registered users stay.<br><small style="color:var(--mute)">This cannot be undone.</small></p>${pwBox()}<div class="btns"><button class="btn ghost" data-a="no">Cancel</button><button class="btn red" data-a="cda">Delete everything</button></div>`)}
+  if(a=="cda"){if(!chkPw())return;const o={},q={};Object.keys(sess).forEach(k=>o[k]=null);Object.keys(acts).forEach(k=>q[k]=null);
+    if(Object.keys(o).length)await update(ref(db,"sessions"),o);if(Object.keys(q).length)await update(ref(db,"activity"),q);
+    await log("deleted ALL data");closeM();toast("All data deleted")}
   if(a=="print"){const f=$("#pf").value,to=$("#pt").value;if(!f||!to)return toast("Select the print date range");
     $("#pa").innerHTML=`<h2>Genex Duty Report</h2><p>${fd(f)} to ${fd(to)}</p>`+Object.keys(users).map(g=>{
       const l=byUser(g).filter(s=>s.d1>=f&&s.d1<=to).reverse();if(!l.length)return"";
-      return `<h3>${esc(users[g].name)} (${esc(g)})</h3>${sumBox(l)}<table>${head}<tbody>${rows(l).replace(/<button.*?<\/button>/g,"")}</tbody></table>`}).join("")||"<p>No data in this range.</p>";
+      return `<h3>${esc(users[g].name)} (${esc(g)})</h3>${sumBox(l)}<table>${head.replace("<th>Action</th>","")}<tbody>${rows(l).replace(/<td class="ac">[\s\S]*?<\/td>/g,"")}</tbody></table>`}).join("")||"<p>No data in this range.</p>";
     window.print()}
   }catch(err){const m=/permission/i.test(err.message)?"Database blocked: set Realtime Database rules to allow read/write":"Error: "+err.message;$("#am")?$("#am").textContent=m:toast(m)}
 });
